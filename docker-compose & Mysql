@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+    redis:
+        image: redis
+        ports:
+            - "6379:6379"
+        networks:
+            - calc_net
+    db:
+        build: mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - calc_net
+        restart: always
+    tata:
+        build: tata
+        environment: [ MYSQL_HOST=db, MYSQL_USER=root, MYSQL_PASSWORD=root, REDIS_HOST=redis, REDIS_PORT=6379 ]
+        networks:
+            - calc_net
+        depends_on: [ db, redis ]
+    bata:
+        build: bata
+        environment: [ MYSQL_HOST=db, MYSQL_USER=root, MYSQL_PASSWORD=root, REDIS_HOST=redis, REDIS_PORT=6379 ]
+        networks:
+            - calc_net
+        depends_on: [ db, redis ]
+    calcindex:
+        build: calcindex
+        environment: [ MYSQL_HOST=db, MYSQL_USER=root, MYSQL_PASSWORD=root, REDIS_HOST=redis, REDIS_PORT=6379 ]
+        networks:
+            - calc_net
+        depends_on: [ db, redis ]
+    ui:
+        build: ui
+        environment: [ MYSQL_HOST=db, MYSQL_USER=root, MYSQL_PASSWORD=root, REDIS_HOST=redis, REDIS_PORT=6379 ]
+        networks:
+            - calc_net
+        depends_on: [ db, redis ]
+        ports:
+            - "5000:5000"
+
+networks:
+    calc_net:
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    FROM mysql:latest
+
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=BHARATINDEX
+COPY BHARATINDEX_schema.sql /docker-entrypoint-initdb.d/
+
+#RUN ["/usr/local/bin/docker-entrypoint.sh", "mysqld", "--datadir", "/initialized-db"]
+
+EXPOSE 3306
+CMD ["mysqld"]
